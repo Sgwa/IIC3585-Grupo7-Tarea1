@@ -20,18 +20,17 @@ En cambio no es necesario considerar cosas como
 Segunda parte
 
 Ahora otra sección para mostrar como mostrar código
+hola
 def say_goodnight(name)
-esult = "Good night, #{name}"
-
-return result
+	result = "Good night, #{name}"
+	return result
 end
-puts say_goodnight "Jaime"
-
+#puts say_goodnight "Jaime"
 class BookInStock
-def initialize(isbn, price)
-@isbn = isbn
-@price = Float(price)
-end
+	def initialize(isbn, price)
+		@isbn = isbn
+		@price = Float(price)
+	end
 end
 Insertar una línea es muy fácil
 __________________________________________________________________________________________
