@@ -1,179 +1,237 @@
-let fs = require('fs');
-const readline = require('readline');
+let fs = require("fs");
+const readline = require("readline");
 
-const filePath = 'output.html'
+const filePath = "output.html";
 
-try { // try to remove file if already exists
-    fs.unlinkSync(filePath)
+try {
+  // try to remove file if already exists
+  fs.unlinkSync(filePath);
 } catch {}
 
 // open file to be written
-const outputWriter = fs.createWriteStream(filePath, {flags: 'a'})
+const outputWriter = fs.createWriteStream(filePath, { flags: "a" });
 
 // write initial part of HTML document
-outputWriter.write('<!DOCTYPE html>\n\
+outputWriter.write(
+  '<!DOCTYPE html>\n\
 <html>\n\
 <head>\n\
 <title>Markdown to HTML</title>\n\
 <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>\n\
 </head>\n\
-<body></body>\n');
+<body></body>\n'
+);
 
 // line reader for input markdown file
 const lineReader = readline.createInterface({
-    input: fs.createReadStream('input.MD')
+  input: fs.createReadStream("input.md")
 });
 
 // variable to signal if parser is inside a code block
 let openCodeBlock = false;
 
 // variable to signal current opened code block type
-let openedCodeBLockType = 'block';
+let openedCodeBLockType = "block";
 
 // variable to signal if parser is inside a list
 let openUnorderedList = false;
 
-const compose = (a, b) => (c) => a(b(c))
+// variable to siganl if parser is inside an ordered list
+let openOrderedList = false;
+// functions that formats a ordered list line
+let orderedLineFormatter;
+
+const compose = (a, b) => c => a(b(c));
 
 const pipe = functions => data => {
-    return functions.reduce((value, func) => func(value), data);
+  return functions.reduce((value, func) => func(value), data);
 };
 
 // counts '#' character to define if will be <h1>, <h2>, etc
 const getHeaderType = line => {
-    let type = 0;
-    line = line.trim()
-    for (let i = 1; i <= 6; i++) {
-        if (line.charAt(i - 1) === '#') {
-            type = i;
-        }
+  let type = 0;
+  line = line.trim();
+  for (let i = 1; i <= 6; i++) {
+    if (line.charAt(i - 1) === "#") {
+      type = i;
     }
-    return type;
-}
+  }
+  return type;
+};
 
 // parse markdown headers to html (# Hello -> <h1>Hello</h1>)
 const hToHtml = line => {
-    let n = getHeaderType(line)
-    if (n > 0 && !openCodeBlock) {
-        line = line.substring(n + 1);
-        line = `<h${n}>` + line + `</h${n}>`;
-    }
-    return line;
-}
+  let n = getHeaderType(line);
+  if (n > 0 && !openCodeBlock) {
+    line = line.substring(n + 1);
+    line = `<h${n}>` + line + `</h${n}>`;
+  }
+  return line;
+};
 
+// Checks if line starts with numbers
+const startsWithDigit = line => {
+  line = line.trim();
+  if (line.substring(0, 1).match(/^\d+$/)) {
+    return true;
+  }
+  return false;
+};
 
 // parse code highlights to html (`hello` -> <code>hello</code>)
 const codeHighlightToHtml = line => {
-    if (!isLimitCodeBlock(line)) {
-        let list = (line.match(/`+/g) || []);
-        list.sort((a, b) => b.length - a.length)
-        list = [...new Set(list)];
-        list.forEach(s => {
-            line = line.replace(s, '<code>')
-            line = line.replace(s, '</code>')
-        });
-    }
-    return line;
-}
+  if (!isLimitCodeBlock(line)) {
+    let list = line.match(/`+/g) || [];
+    list.sort((a, b) => b.length - a.length);
+    list = [...new Set(list)];
+    list.forEach(s => {
+      line = line.replace(s, "<code>");
+      line = line.replace(s, "</code>");
+    });
+  }
+  return line;
+};
 
 // detect if line is a code block start/end (```, ```python)
 const isLimitCodeBlock = line => {
-    let count = (line.match(/```/g) || []).length;
-    return count === 1;
-}
+  let count = (line.match(/```/g) || []).length;
+  return count === 1;
+};
 
 // parse code block start/end to html (```python -> <pre class="prettyprint"><code class="language-python">)
 const limitCodeBlockToHtml = line => {
-    if (isLimitCodeBlock(line)) {
-        let type = codeBlockType(line);
-        if (type != 'end' && type != 'none') {
-            line = line.replace(type, '');
-            openedCodeBLockType = type;
-        }
-        if (type === 'end') {
-            line = line.replace('```', `</br></code></pre>`);
-            openedCodeBLockType = 'block'
-        } else if (openedCodeBLockType === 'block') {
-            line = line.replace('```', `<pre class="prettyprint"><code>`);
-        } else {
-            line = line.replace('```', `<pre class="prettyprint"><code class="language-${openedCodeBLockType}">`);
-        }
+  if (isLimitCodeBlock(line)) {
+    let type = codeBlockType(line);
+    if (type != "end" && type != "none") {
+      line = line.replace(type, "");
+      openedCodeBLockType = type;
     }
-    return line;
-}
+    if (type === "end") {
+      line = line.replace("```", `</br></code></pre>`);
+      openedCodeBLockType = "block";
+    } else if (openedCodeBLockType === "block") {
+      line = line.replace("```", `<pre class="prettyprint"><code>`);
+    } else {
+      line = line.replace(
+        "```",
+        `<pre class="prettyprint"><code class="language-${openedCodeBLockType}">`
+      );
+    }
+  }
+  return line;
+};
 
 // detect code block type
 const codeBlockType = line => {
-    line = line.substring(3)
-    if (line === '') {
-        if (openCodeBlock) {
-            line = 'end'
-        } else {
-            line = 'none'
-        }
+  line = line.substring(3);
+  if (line === "") {
+    if (openCodeBlock) {
+      line = "end";
+    } else {
+      line = "none";
     }
-    openCodeBlock = !openCodeBlock;
-    return line;
-}
+  }
+  openCodeBlock = !openCodeBlock;
+  return line;
+};
 
 // parse horizontal rule to html (*** -> <hr>)
 const horizontalRuleToHtml = line => {
-    if (line === '---' || line === '___' || line === '***') {
-        line = '<hr>'
-    }
-    return line;
-}
+  if (line === "---" || line === "___" || line === "***") {
+    line = "<hr>";
+  }
+  return line;
+};
 
 // parse unordered lists to html (* first -> <ul><li> first</li>, * second -> <li> second</li>)
 const unorderedlistToHtml = line => {
-    let characters = ['*', '-', '+'];
-    for (c in characters) {
-        if (line.charAt(0) === characters[c] && line.charAt(1) === ' ') {
-            line = line.substring(1);
-            if (!openUnorderedList) {
-                line = '<ul>\n<li>' + line + '</li>'
-            } else {
-                line = '<li>' + line + '</li>'
-            }
-            openUnorderedList = true;
-            break;
-        }
+  let characters = ["*", "-", "+"];
+  for (c in characters) {
+    if (line.charAt(0) === characters[c] && line.charAt(1) === " ") {
+      line = line.substring(1);
+      if (!openUnorderedList) {
+        line = "<ul>\n<li>" + line + "</li>";
+      } else {
+        line = "<li>" + line + "</li>";
+      }
+      openUnorderedList = true;
+      break;
+    }
+  }
+  return line;
+};
+
+const curriedOrderedFormatter = n => {
+  let index = parseInt(n) - 1;
+  return line => {
+    index += 1;
+    return `<li>${line}</li>`;
+  };
+};
+
+const orderedListToHtml = line => {
+  if (
+    startsWithDigit(line) &&
+    (line.match(/./g) || []).length > 0 &&
+    !openCodeBlock
+  ) {
+    const splittedLine = line.split(".");
+    if (!openOrderedList) {
+      openOrderedList = true;
+      orderedLineFormatter = curriedOrderedFormatter(splittedLine[0]);
+      return `<ol start="${splittedLine[0]}">\n${orderedLineFormatter(
+        splittedLine[1]
+      )}`;
+    }
+    return orderedLineFormatter(splittedLine[1]);
+  } else {
+    if (openOrderedList) {
+      openOrderedList = false;
+      line = `</ol>\n${line}`;
     }
     return line;
-}
+  }
+};
 
 // pipeline to set all parsing '*ToHtml' functions
-const parserPipeline = pipe([codeHighlightToHtml, limitCodeBlockToHtml, hToHtml, horizontalRuleToHtml, unorderedlistToHtml]);
+const parserPipeline = pipe([
+  codeHighlightToHtml,
+  limitCodeBlockToHtml,
+  hToHtml,
+  horizontalRuleToHtml,
+  unorderedlistToHtml,
+  orderedListToHtml
+]);
 
 // run pipeline on lines that are not empty and returns the parsed line
 const parseLine = line => {
-    if (line != '') {
-        return parserPipeline(line);
-    } else if (openUnorderedList) {
-        line = '</ul>'
-        openUnorderedList = false;
-    }
-    return line;
-}
+  if (line != "") {
+    return parserPipeline(line);
+  } else if (openUnorderedList) {
+    line = "</ul>";
+    openUnorderedList = false;
+  }
+  return line;
+};
 
 // write line on the output html
 const writeLine = line => {
-    if (line != '') {
-        if (!openCodeBlock && !openUnorderedList) {
-            outputWriter.write('<div>' + line + '</div>\n');
-        } else {
-            outputWriter.write(' ' + line + '\n');
-        }
+  if (line != "") {
+    if (!openCodeBlock && !openUnorderedList && !openOrderedList) {
+      outputWriter.write("<div>" + line + "</div>\n");
+    } else {
+      outputWriter.write(" " + line + "\n");
     }
-}
+  }
+};
 
 // compose of parseLine and writeLine
 const writeParsedLine = compose(writeLine, parseLine);
 
 // parsing and writing line by line
-lineReader.on('line', line => {
-    writeParsedLine(line);
+lineReader.on("line", line => {
+  writeParsedLine(line);
 });
 
 // write final part of HTML document
-lineReader.on('pause', () => outputWriter.write('</body>\n</html>'));
+lineReader.on("pause", () => outputWriter.write("</body>\n</html>"));

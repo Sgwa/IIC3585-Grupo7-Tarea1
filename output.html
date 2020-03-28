@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Markdown to HTML</title>
+<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+</head>
+<body></body>
+<div><h1>Este es un ejemplo</h1></div>
+<div><h2>Primera parte</h2></div>
+<div>En esta sección veremos como funciona ala, ala, bla ..., ala, ala,</div>
+<div>bla ..., ala, ala, bla ..., ala, ala, bla ..., ala, ala, bla ..., ala, ala, bla ...,</div>
+<div>ala, ala, bla ..., ala, ala, bla ..., ala, ala, bla ...</div>
+<div>Las posibles consecuencias de ello son</div>
+ <ol start="2">
+<li> Primera</li>
+ <li> Segunda</li>
+ <li> Tercera</li>
+<div></ol>
+En cambio no es necesario considerar cosas como</div>
+ <ul>
+<li> algo</li>
+ <li> algo mas</li>
+ <li> etcetera</li>
+ <h2>Segunda parte</h2>
+ Ahora otra sección para mostrar como mostrar código
+<div></ul></div>
+<div><code>hola</code></div>
+ <pre class="prettyprint"><code>
+ def say_goodnight(name)
+     result = "Good night, #{name}"
+     return result
+ end
+ #puts say_goodnight "Jaime"
+ class BookInStock
+     def initialize(isbn, price)
+         @isbn = isbn
+         @price = Float(price)
+     end
+ end
+<div></br></code></pre></div>
+<div>Insertar una línea es muy fácil</div>
+<div><hr></div>
+</body>
+</html>

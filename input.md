@@ -4,9 +4,9 @@ En esta sección veremos como funciona ala, ala, bla ..., ala, ala,
 bla ..., ala, ala, bla ..., ala, ala, bla ..., ala, ala, bla ..., ala, ala, bla ...,
 ala, ala, bla ..., ala, ala, bla ..., ala, ala, bla ...
 Las posibles consecuencias de ello son
-1. Primera
-2. Segunda
-3. Tercera
+2. Primera
+222. Segunda
+33. Tercera
 
 En cambio no es necesario considerar cosas como
 * algo
