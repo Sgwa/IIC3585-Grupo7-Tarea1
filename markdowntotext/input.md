@@ -1,37 +1,34 @@
-Este es un ejemplo
-
-Primera parte
-
+# Este es un ejemplo
+## Primera parte
 En esta sección veremos como funciona ala, ala, bla ..., ala, ala,
 bla ..., ala, ala, bla ..., ala, ala, bla ..., ala, ala, bla ..., ala, ala, bla ...,
 ala, ala, bla ..., ala, ala, bla ..., ala, ala, bla ...
 Las posibles consecuencias de ello son
-
-	1. Primera
-	2. Segunda
-	3. Tercera
+1. Primera
+222. Segunda
+33. Tercera
 
 En cambio no es necesario considerar cosas como
+* algo
+* algo mas
+* etcetera
 
-	• algo
-	• algo mas
-	• etcetera
-
-Segunda parte
-
+## Segunda parte
 Ahora otra sección para mostrar como mostrar código
-hola
+
+`hola`
+```
 def say_goodnight(name)
-	result = "Good night, #{name}"
-	return result
+    result = "Good night, #{name}"
+    return result
 end
 #puts say_goodnight "Jaime"
 class BookInStock
-	def initialize(isbn, price)
-		@isbn = isbn
-		@price = Float(price)
-	end
+    def initialize(isbn, price)
+        @isbn = isbn
+        @price = Float(price)
+    end
 end
+```
 Insertar una línea es muy fácil
-__________________________________________________________________________________________
-
+***
